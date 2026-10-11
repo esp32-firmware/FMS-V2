@@ -1048,22 +1048,28 @@ void updateScreen(int batPercent) {
 
     if (systemError != "OK") { display.setCursor(0, 15); display.print("SYS: " + systemError); }
 
-    display.drawRoundRect(6, 18, 116, 24, 4, SH110X_WHITE); 
-    display.fillTriangle(16, 30, 22, 26, 22, 34, SH110X_WHITE); 
-    display.fillTriangle(112, 30, 106, 26, 106, 34, SH110X_WHITE); 
+    // --- UPGRADED: Taller Month Box ---
+    display.drawRoundRect(6, 17, 116, 30, 4, SH110X_WHITE); 
+    // Shifted triangles down to center them in the new 30px tall box
+    display.fillTriangle(16, 32, 22, 27, 22, 37, SH110X_WHITE); 
+    display.fillTriangle(112, 32, 106, 27, 106, 37, SH110X_WHITE); 
 
-    display.setFont(&FreeSansBold9pt7b); display.setTextSize(1);
+    // --- UPGRADED: Larger 12pt Font for the Month ---
+    display.setFont(&FreeSansBold12pt7b); display.setTextSize(1);
     String fullMonth = monthNames[selectedMonth]; String shortMonth = fullMonth.substring(0, 3); shortMonth.toUpperCase(); 
     display.getTextBounds(shortMonth, 0, 0, &x1, &y1, &w, &h);
-    display.setCursor((SCREEN_WIDTH - w) / 2 - x1, 35); display.print(shortMonth);
+    display.setCursor((SCREEN_WIDTH - w) / 2 - x1, 39); // Lowered baseline to fit 12pt font perfectly
+    display.print(shortMonth);
     display.setFont(); 
 
+    // --- UPGRADED: Shifted "Tap Reg Book" down to the bottom ---
     float wave = (sin(millis() / 350.0) + 1.0) / 2.0; int offset = wave * 4; 
     String prompt = "Tap Reg Book"; display.setTextSize(1); display.getTextBounds(prompt, 0, 0, &x1, &y1, &w, &h);
     int textX = (SCREEN_WIDTH - w) / 2 - x1;
-    display.setCursor(textX, 48); display.print(prompt);
-    display.setCursor(textX - 18 - offset, 48); display.print(">>");
-    display.setCursor(textX + w + 6 + offset, 48); display.print("<<");
+    
+    display.setCursor(textX, 55); display.print(prompt);
+    display.setCursor(textX - 18 - offset, 55); display.print(">>");
+    display.setCursor(textX + w + 6 + offset, 55); display.print("<<");
   }
   display.display();
 }
@@ -1099,6 +1105,11 @@ void setup() {
   // Fast Non-Blocking WiFi Start
   WiFi.mode(WIFI_STA); 
   WiFi.begin(); 
+  
+  // Start mDNS so http://fms.local works!
+  if (MDNS.begin("fms")) {
+    MDNS.addService("http", "tcp", 80);
+  }
   
   // Start Web Server for Portal Intercept & API
   setupWebEndpoints();
